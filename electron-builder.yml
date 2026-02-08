@@ -1,0 +1,158 @@
+appId: app.apexyy.clawx
+productName: ClawX-ApexYY
+copyright: Copyright © 2026 ApexYY
+compression: normal
+artifactName: ${productName}-${version}-${os}-${arch}.${ext}
+
+directories:
+  output: release
+  buildResources: resources
+
+files:
+  - dist
+  - dist-electron
+  - package.json
+
+extraResources:
+  - from: resources/
+    to: resources/
+    filter:
+      - "**/*"
+      - "!icons/*.md"
+      - "!icons/*.svg"
+      - "!bin/**"
+  # OpenClaw submodule - include only necessary files for runtime
+  - from: openclaw/
+    to: openclaw/
+    filter:
+      - "openclaw.mjs"
+      - "package.json"
+      - "dist/**/*"
+      - "skills/**/*"
+      - "extensions/**/*"
+      - "scripts/run-node.mjs"
+      - "!**/node_modules/**"
+      - "!**/*.test.ts"
+      - "!**/*.test.js"
+      - "!**/test/**"
+      - "!**/.git"
+      - "!**/.github"
+      - "!**/docs/**"
+
+asar: true
+asarUnpack:
+  - "**/*.node"
+
+# Auto-update configuration
+publish:
+  - provider: github
+    owner: oscn2077
+    repo: clawx-apexyy
+    releaseType: release
+
+# macOS Configuration
+mac:
+  extraResources:
+    - from: resources/bin/darwin-${arch}
+      to: bin
+  category: public.app-category.productivity
+  icon: resources/icons/icon.icns
+  target:
+    - target: dmg
+      arch:
+        - universal
+    - target: zip
+      arch:
+        - universal
+  darkModeSupport: true
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: entitlements.mac.plist
+  entitlementsInherit: entitlements.mac.plist
+  notarize: false
+  extendInfo:
+    NSMicrophoneUsageDescription: ClawX-ApexYY 需要麦克风权限用于语音功能
+    NSCameraUsageDescription: ClawX-ApexYY 需要摄像头权限用于视频功能
+
+dmg:
+  background: resources/dmg-background.png
+  icon: resources/icons/icon.icns
+  iconSize: 100
+  contents:
+    - type: file
+      x: 130
+      y: 220
+    - type: link
+      path: /Applications
+      x: 410
+      y: 220
+
+# Windows Configuration
+win:
+  extraResources:
+    - from: resources/bin/win32-${arch}
+      to: bin
+  icon: resources/icons/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - arm64
+  publisherName: ApexYY
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: false
+  differentialPackage: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: ClawX-ApexYY
+  uninstallDisplayName: ClawX-ApexYY
+  installerIcon: resources/icons/icon.ico
+  uninstallerIcon: resources/icons/icon.ico
+
+# Linux Configuration
+linux:
+  icon: resources/icons
+  target:
+    - target: AppImage
+      arch:
+        - x64
+        - arm64
+    - target: deb
+      arch:
+        - x64
+        - arm64
+    - target: rpm
+      arch:
+        - x64
+  category: Utility
+  maintainer: ApexYY <support@apexyy.com>
+  vendor: ApexYY
+  synopsis: 云翼专版 AI 助手
+  description: |
+    ClawX-ApexYY 是云翼专版 AI 桌面客户端，基于 OpenClaw Gateway，
+    预置云翼 API 节点，支持 Claude 和 Codex 双产品线。
+  desktop:
+    Name: ClawX-ApexYY-ApexYY
+    Comment: 云翼专版 AI 助手
+    Categories: Utility;Network;
+    Keywords: ai;assistant;apexyy;yunyi;chat;
+
+appImage:
+  license: LICENSE
+
+deb:
+  depends:
+    - libgtk-3-0
+    - libnotify4
+    - libnss3
+    - libxss1
+    - libxtst6
+    - xdg-utils
+    - libatspi2.0-0
+    - libuuid1
+  afterInstall: scripts/linux/after-install.sh
+  afterRemove: scripts/linux/after-remove.sh
